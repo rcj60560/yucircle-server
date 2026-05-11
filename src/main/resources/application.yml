@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: yucircle-backend
+  datasource:
+    url: jdbc:mysql://localhost:3306/yucircle?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&allowMultiQueries=true
+    username: root
+    password: admin
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: auto
+
+jwt:
+  secret: yucircle-secret-key-2026-badminton-community-very-long-key
+  expiration: 86400000
