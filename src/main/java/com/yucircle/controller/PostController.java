@@ -4,6 +4,7 @@ import com.yucircle.dto.ApiResponse;
 import com.yucircle.dto.CreatePostRequest;
 import com.yucircle.dto.PageResult;
 import com.yucircle.dto.UpdatePostRequest;
+import com.yucircle.dto.PostWithUserDto;
 import com.yucircle.entity.Post;
 import com.yucircle.service.PostService;
 import com.yucircle.util.JwtUtils;
@@ -30,7 +31,7 @@ public class PostController {
     }
 
     @GetMapping
-    public ApiResponse<PageResult<Post>> listPosts(
+    public ApiResponse<PageResult<PostWithUserDto>> listPosts(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int limit) {
         return ApiResponse.success(postService.listPosts(page, limit));
