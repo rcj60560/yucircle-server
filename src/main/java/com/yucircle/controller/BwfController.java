@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * BWF 数据查询 + 调试重抓入口。设计见 doc/06 §6。
@@ -57,6 +60,67 @@ public class BwfController {
             return ApiResponse.error("场次不存在：" + tmtId + "/" + code);
         }
         return ApiResponse.success(detail);
+    }
+
+    /**
+     * 应用兼容端点：与 App 内置资产 JSON 同构（无 ApiResponse 包装），
+     * 供 App 远端层直连（dev=localhost / 生产=阿里云）。
+     */
+    @GetMapping("/app/rankings")
+    public Map<String, Object> appRankings() {
+        Map<String, Object> disciplines = new LinkedHashMap<>();
+        Map<String, String> names = Map.of("ms", "男单", "ws", "女单", "md", "男双", "wd", "女双", "xd", "混双");
+        String updatedAt = null;
+        for (String disc : new String[]{"ms", "ws", "md", "wd", "xd"}) {
+            List<Map<String, Object>> entries = syncService.latestRankings(disc).stream()
+                    .map(e -> {
+                        Map<String, Object> m = new LinkedHashMap<>();
+                        m.put("rank", e.getRank());
+                        m.put("change", e.getRankChange());
+                        m.put("country", e.getCountry());
+                        m.put("player", e.getPlayerName());
+                        m.put("points", e.getPoints());
+                        return m;
+                    })
+                    .toList();
+            Map<String, Object> d = new LinkedHashMap<>();
+            d.put("name", names.get(disc));
+            d.put("entries", entries);
+            disciplines.put(disc, d);
+            if (updatedAt == null && !entries.isEmpty()) {
+                updatedAt = syncService.latestRankings(disc).get(0).getPublicationDate().toString();
+            }
+        }
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("updatedAt", updatedAt);
+        body.put("source", "yucircle-server");
+        body.put("disciplines", disciplines);
+        return body;
+    }
+
+    /** 应用兼容端点：赛程资产同构 */
+    @GetMapping("/app/schedule")
+    public Map<String, Object> appSchedule() {
+        List<Map<String, Object>> tournaments = syncService.schedule().stream()
+                .map(t -> {
+                    Map<String, Object> m = new LinkedHashMap<>();
+                    m.put("name", t.getName());
+                    m.put("startDate", t.getStartDate() == null ? null : t.getStartDate().toString());
+                    m.put("endDate", t.getEndDate() == null ? null : t.getEndDate().toString());
+                    m.put("city", t.getCity());
+                    m.put("level", t.getLevel());
+                    m.put("prizeMoney", t.getPrizeMoney() == null ? 0 : t.getPrizeMoney());
+                    m.put("code", t.getCode());
+                    m.put("tmtId", t.getTmtId());
+                    m.put("hasLiveScores", Boolean.TRUE.equals(t.getHasLiveScores()));
+                    return m;
+                })
+                .toList();
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("updatedAt", LocalDate.now().toString());
+        body.put("year", LocalDate.now().getYear());
+        body.put("tournaments", tournaments);
+        return body;
     }
 
     /**
