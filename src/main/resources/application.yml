@@ -27,3 +27,9 @@ mybatis-plus:
 jwt:
   secret: yucircle-secret-key-2026-badminton-community-very-long-key
   expiration: 86400000
+
+# BWF 数据同步（设计见 doc/06）
+bwf:
+  sync:
+    enabled: true            # 定时总开关（本地调试可关）
+    point-sync-levels: major # 逐分只抓这些 level（逗号分隔；扩全站改这里）
