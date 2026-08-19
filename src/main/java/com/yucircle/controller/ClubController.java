@@ -1,6 +1,7 @@
 package com.yucircle.controller;
 
 import com.yucircle.dto.ApiResponse;
+import com.yucircle.dto.ClubActivityDto;
 import com.yucircle.dto.ClubDto;
 import com.yucircle.dto.CreateClubRequest;
 import com.yucircle.entity.Club;
@@ -43,6 +44,12 @@ public class ClubController {
             return ApiResponse.error(404, "Club not found");
         }
         return ApiResponse.success(club);
+    }
+
+    @GetMapping("/{clubId}/activities")
+    public ApiResponse<List<ClubActivityDto>> listClubActivities(@PathVariable Long clubId) {
+        List<ClubActivityDto> activities = clubService.listClubActivities(clubId);
+        return ApiResponse.success(activities);
     }
 
     private Long getUserId(HttpServletRequest request) {

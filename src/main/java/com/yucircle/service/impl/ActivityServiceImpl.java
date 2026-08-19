@@ -109,6 +109,11 @@ public class ActivityServiceImpl extends ServiceImpl<ActivityMapper, Activity> i
 
     @Override
     public ActivityLobbyDto getLobbySnapshot(Long activityId) {
+        return getLobbySnapshot(activityId, null);
+    }
+
+    @Override
+    public ActivityLobbyDto getLobbySnapshot(Long activityId, Long userId) {
         Activity activity = getById(activityId);
         if (activity == null) {
             throw new RuntimeException("Activity not found");
@@ -123,6 +128,8 @@ public class ActivityServiceImpl extends ServiceImpl<ActivityMapper, Activity> i
         lobby.setVenueName(venue != null ? venue.getName() : "");
         lobby.setClubName(club != null ? club.getName() : "");
         lobby.setTimeSlot(activity.getTimeSlot());
+        lobby.setMatchType(activity.getMatchType());
+        lobby.setLevelRequirement(activity.getLevelRequirement());
         lobby.setStatus(activity.getStatus());
 
         // Count online users
@@ -130,6 +137,30 @@ public class ActivityServiceImpl extends ServiceImpl<ActivityMapper, Activity> i
         presenceQuery.eq(ActivityPresence::getActivityId, activityId);
         long onlineCount = activityPresenceMapper.selectCount(presenceQuery);
         lobby.setOnlineCount((int) onlineCount);
+
+        // Count online users at venue level (deduplicated users in same venue, recent ping only)
+        LambdaQueryWrapper<Activity> venueActivityQuery = new LambdaQueryWrapper<>();
+        venueActivityQuery.eq(Activity::getVenueId, activity.getVenueId());
+        List<Activity> venueActivities = list(venueActivityQuery);
+
+        int venueOnlineCount = 0;
+        if (!venueActivities.isEmpty()) {
+            List<Long> venueActivityIds = venueActivities.stream()
+                .map(Activity::getId)
+                .collect(Collectors.toList());
+            LocalDateTime activeThreshold = LocalDateTime.now().minusSeconds(PING_TIMEOUT_SECONDS);
+
+            LambdaQueryWrapper<ActivityPresence> venuePresenceQuery = new LambdaQueryWrapper<>();
+            venuePresenceQuery.in(ActivityPresence::getActivityId, venueActivityIds)
+                .ge(ActivityPresence::getLastPingAt, activeThreshold);
+            List<ActivityPresence> venuePresences = activityPresenceMapper.selectList(venuePresenceQuery);
+
+            Set<Long> venueOnlineUserIds = venuePresences.stream()
+                .map(ActivityPresence::getUserId)
+                .collect(Collectors.toSet());
+            venueOnlineCount = venueOnlineUserIds.size();
+        }
+        lobby.setVenueOnlineCount(venueOnlineCount);
 
         // Get active broadcast
         LambdaQueryWrapper<Broadcast> broadcastQuery = new LambdaQueryWrapper<>();
@@ -171,6 +202,7 @@ public class ActivityServiceImpl extends ServiceImpl<ActivityMapper, Activity> i
                 SlotDto slotDto = new SlotDto();
                 slotDto.setSlotNumber(slot.getSlotNumber());
                 slotDto.setStatus(slot.getSlotStatus());
+                slotDto.setIsMine(userId != null && userId.equals(slot.getUserId()));
 
                 if (slot.getUserId() != null) {
                     User user = userMapper.selectById(slot.getUserId());

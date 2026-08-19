@@ -10,4 +10,5 @@ public class SlotDto {
     private String avatar;
     private String level;
     private String status;
+    private Boolean isMine; // true if this slot is for current user
 }

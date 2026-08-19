@@ -14,6 +14,8 @@ public interface ActivityService extends IService<Activity> {
 
     ActivityLobbyDto getLobbySnapshot(Long activityId);
 
+    ActivityLobbyDto getLobbySnapshot(Long activityId, Long userId);
+
     ActivitySlotDto reserveSlot(Long userId, Long activityId, ReserveSlotRequest request);
 
     void cancelSlot(Long userId, Long activityId);
