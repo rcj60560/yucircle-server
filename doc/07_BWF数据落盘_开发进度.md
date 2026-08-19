@@ -5,7 +5,7 @@
 ## 开发步骤清单
 
 - [x] 1. 文档体系：架构设计 + 本进度文档；清理过时交付文档
-- [ ] 2. 建表：init.sql 追加 5 张 `bwf_*` 表（含唯一键）+ entity/mapper
+- [x] 2. 建表：init.sql 追加 5 张 `bwf_*` 表（含唯一键）+ entity/mapper
 - [ ] 3. BwfExtranetClient：5 端点封装（HTTP 可注入）+ 单测
 - [ ] 4. BwfSyncService：解析 + 幂等 upsert（逐分仅 major）+ 单测
 - [ ] 5. BwfController 查询接口 + admin/refresh + BwfSyncTasks 定时 + yml 配置
@@ -16,6 +16,7 @@
 
 | 日期 | 提交 | 内容 |
 |---|---|---|
+| 2026-08-19 | （见下） | 5 张 bwf_* 表 DDL（唯一键 upsert 依据）+ 5 entity + 5 mapper，compileJava 通过 |
 | 2026-08-19 | — | 设计定稿（用户确认：v0 只今年、逐分仅 Grade 1 大赛、server 自抓、先本地后阿里云）；文档体系建立，旧交付文档清理（FINAL_REPORT / DELIVERY_* / PHASE4_COMPLETION_SUMMARY / API_TESTING / QUICKSTART / HELP 删除，README 与 doc/05 保留） |
 
 ## 下次接续

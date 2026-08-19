@@ -197,3 +197,87 @@ VALUES
     (1, 1, 1, '俱乐部 A 今晚活动', CURDATE(), 'EVENING', 'DOUBLES', 10, 6, 'open', NOW(), NOW()),
     (1, 2, 1, '俱乐部 B 今晚活动', CURDATE(), 'EVENING', 'DOUBLES', 10, 6, 'open', NOW(), NOW()),
     (1, 3, 1, '俱乐部 C 今晚活动', CURDATE(), 'EVENING', 'DOUBLES', 10, 6, 'open', NOW(), NOW());
+
+-- ============ BWF 数据落盘（2026-08-19，设计见 doc/06）============
+CREATE TABLE IF NOT EXISTS `bwf_tournament` (
+    `id`              BIGINT       NOT NULL AUTO_INCREMENT COMMENT '自增ID',
+    `tmt_id`          INT          NOT NULL COMMENT 'BWF数字赛事id',
+    `name`            VARCHAR(200) NOT NULL COMMENT '赛事名',
+    `level`           VARCHAR(20)           COMMENT 'major/super1000/super750/super500/super300/finals/other',
+    `start_date`      DATE                  COMMENT '开始日期',
+    `end_date`        DATE                  COMMENT '结束日期',
+    `city`            VARCHAR(100)          COMMENT '城市',
+    `country`         VARCHAR(100)          COMMENT '国家',
+    `prize_money`     INT          DEFAULT 0 COMMENT '总奖金(美元)',
+    `code`            VARCHAR(64)           COMMENT 'extranet UUID赛事码',
+    `has_live_scores` TINYINT(1)   DEFAULT 0 COMMENT '是否有live比分',
+    `created_at`      DATETIME              COMMENT '创建时间',
+    `updated_at`      DATETIME              COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_tmt_id` (`tmt_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='BWF赛事';
+
+CREATE TABLE IF NOT EXISTS `bwf_ranking_entry` (
+    `id`               BIGINT       NOT NULL AUTO_INCREMENT,
+    `discipline`       VARCHAR(4)   NOT NULL COMMENT 'ms/ws/md/wd/xd',
+    `publication_date` DATE         NOT NULL COMMENT '发布日期（周key的date）',
+    `rank`             INT          NOT NULL COMMENT '排名',
+    `rank_change`      INT          DEFAULT 0 COMMENT '升降',
+    `country`          VARCHAR(50)           COMMENT '国家码',
+    `player_name`      VARCHAR(200) NOT NULL COMMENT '球员名（双打拼接 A / B）',
+    `points`           INT          DEFAULT 0 COMMENT '积分',
+    `created_at`       DATETIME              COMMENT '创建时间',
+    `updated_at`       DATETIME              COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_pub` (`discipline`, `publication_date`, `rank`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='BWF排名快照';
+
+CREATE TABLE IF NOT EXISTS `bwf_match` (
+    `id`            BIGINT       NOT NULL AUTO_INCREMENT,
+    `tmt_id`        INT          NOT NULL COMMENT 'BWF数字赛事id',
+    `match_code`    VARCHAR(20)  NOT NULL COMMENT '场次码（赛事内唯一）',
+    `match_date`    DATE                  COMMENT '赛事日（按日查询用）',
+    `event`         VARCHAR(4)            COMMENT 'MS/WS/MD/WD/XD',
+    `round_name`    VARCHAR(20)           COMMENT 'R64/QF/SF/F',
+    `court_name`    VARCHAR(50)           COMMENT '场地',
+    `match_time`    DATETIME              COMMENT '开赛时间(本地)',
+    `status`        VARCHAR(2)            COMMENT 'F=已结束 P=进行中 N=未开赛',
+    `winner`        TINYINT      DEFAULT 0 COMMENT '1/2，0=未定',
+    `duration_min`  INT                   COMMENT '时长(分钟)',
+    `team1_country` VARCHAR(10)           COMMENT '方1国家码',
+    `team1_players` VARCHAR(200)          COMMENT '方1球员（双打拼接）',
+    `team1_seed`    VARCHAR(4)            COMMENT '方1种子',
+    `team2_country` VARCHAR(10)           COMMENT '方2国家码',
+    `team2_players` VARCHAR(200)          COMMENT '方2球员（双打拼接）',
+    `team2_seed`    VARCHAR(4)            COMMENT '方2种子',
+    `score_text`    VARCHAR(50)           COMMENT '局分文本，如 21-15 19-21 21-18',
+    `created_at`    DATETIME              COMMENT '创建时间',
+    `updated_at`    DATETIME              COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_match` (`tmt_id`, `match_code`),
+    KEY `idx_tmt_date` (`tmt_id`, `match_date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='BWF单场赛果';
+
+CREATE TABLE IF NOT EXISTS `bwf_match_game` (
+    `id`          BIGINT NOT NULL AUTO_INCREMENT,
+    `match_id`    BIGINT NOT NULL COMMENT 'bwf_match.id',
+    `game_no`     INT    NOT NULL COMMENT '局号(1起)',
+    `team1_score` INT             COMMENT '方1局分',
+    `team2_score` INT             COMMENT '方2局分',
+    `created_at`  DATETIME        COMMENT '创建时间',
+    `updated_at`  DATETIME        COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_game` (`match_id`, `game_no`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='BWF局';
+
+CREATE TABLE IF NOT EXISTS `bwf_match_point` (
+    `id`         BIGINT NOT NULL AUTO_INCREMENT,
+    `game_id`    BIGINT NOT NULL COMMENT 'bwf_match_game.id',
+    `ordering`   INT    NOT NULL COMMENT '第几分(1起)',
+    `team1`      INT    DEFAULT 0 COMMENT '方1累计得分',
+    `team2`      INT    DEFAULT 0 COMMENT '方2累计得分',
+    `created_at` DATETIME        COMMENT '创建时间',
+    `updated_at` DATETIME        COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_point` (`game_id`, `ordering`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='BWF逐分序列（仅Grade 1大赛）';
