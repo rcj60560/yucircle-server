@@ -154,10 +154,12 @@ public final class BwfParser {
     /** 当日对阵 → 赛果行（顺序保持官方对阵顺序；scoreText 同步生成） */
     public static List<BwfMatch> dayMatches(JsonNode array, int tmtId, LocalDate matchDate) {
         List<BwfMatch> list = new ArrayList<>();
+        int orderNo = 0;
         for (JsonNode m : array) {
             BwfMatch e = new BwfMatch();
             e.setTmtId(tmtId);
             e.setMatchCode(m.path("code").asText());
+            e.setOrderNo(++orderNo);
             e.setMatchDate(matchDate);
             e.setEvent(m.path("eventName").asText());
             e.setRoundName(m.path("roundName").asText(""));

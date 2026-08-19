@@ -7,7 +7,7 @@
 - [x] 1. 文档体系：架构设计 + 本进度文档；清理过时交付文档
 - [x] 2. 建表：init.sql 追加 5 张 `bwf_*` 表（含唯一键）+ entity/mapper
 - [x] 3. BwfExtranetClient（5 端点、fetch 可注入）+ BwfParser 纯解析 + BwfParserTest 5 用例全绿（含官方顺序/累计分/grade1-major 坑位断言）；build.gradle 补 junit-platform-launcher
-- [ ] 4. BwfSyncService：解析 + 幂等 upsert（逐分仅 major）+ 单测
+- [x] 4. BwfSyncService：syncRankings/syncSchedule/syncDayMatches/syncMatchPoints（JdbcTemplate 批量 ON DUPLICATE KEY UPDATE）+ 查询方法；bwf_match 增 order_no 列保官方顺序
 - [ ] 5. BwfController 查询接口 + admin/refresh + BwfSyncTasks 定时 + yml 配置
 - [ ] 6. gradle 编译/测试全绿，分次提交
 - [ ] 7. （后端完成后）App 远端层切 server（dev=localhost），前端提交
@@ -16,6 +16,7 @@
 
 | 日期 | 提交 | 内容 |
 |---|---|---|
+| 2026-08-19 | （见下） | 4. 同步服务+查询；order_no 落官方顺序 |
 | 2026-08-19 | （见下） | 3. 客户端+解析器+单测；测试基建修复（Gradle9 需 junit-platform-launcher）|
 | 2026-08-19 | （见下） | 5 张 bwf_* 表 DDL（唯一键 upsert 依据）+ 5 entity + 5 mapper，compileJava 通过 |
 | 2026-08-19 | — | 设计定稿（用户确认：v0 只今年、逐分仅 Grade 1 大赛、server 自抓、先本地后阿里云）；文档体系建立，旧交付文档清理（FINAL_REPORT / DELIVERY_* / PHASE4_COMPLETION_SUMMARY / API_TESTING / QUICKSTART / HELP 删除，README 与 doc/05 保留） |

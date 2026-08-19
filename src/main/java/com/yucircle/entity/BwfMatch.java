@@ -16,6 +16,8 @@ public class BwfMatch {
     private Long id;
     private Integer tmtId;
     private String matchCode;
+    /** 官方对阵顺序（day-matches 原序，查询按它排序） */
+    private Integer orderNo;
     private LocalDate matchDate;
     private String event;
     private String roundName;

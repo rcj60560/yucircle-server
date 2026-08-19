@@ -236,6 +236,7 @@ CREATE TABLE IF NOT EXISTS `bwf_match` (
     `id`            BIGINT       NOT NULL AUTO_INCREMENT,
     `tmt_id`        INT          NOT NULL COMMENT 'BWF数字赛事id',
     `match_code`    VARCHAR(20)  NOT NULL COMMENT '场次码（赛事内唯一）',
+    `order_no`      INT                   COMMENT '官方对阵顺序（day-matches 原序）',
     `match_date`    DATE                  COMMENT '赛事日（按日查询用）',
     `event`         VARCHAR(4)            COMMENT 'MS/WS/MD/WD/XD',
     `round_name`    VARCHAR(20)           COMMENT 'R64/QF/SF/F',
