@@ -1,7 +1,6 @@
 package com.yucircle.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -17,9 +16,9 @@ public class BwfRankingEntry {
     private Long id;
     private String discipline;
     private LocalDate publicationDate;
-    /** 列名 rank_num：rank 是 MySQL8 保留字，生成 SQL 不加反引号会 1064 */
-    @TableField("rank_num")
-    private Integer rank;
+    /** 属性名必须与列 rank_num 驼峰一致：rank 是 MySQL8 保留字，
+        属性叫 rank 时 MP 会生成 "rank_num AS rank" 别名照样 1064 */
+    private Integer rankNum;
     private Integer rankChange;
     private String country;
     private String playerName;

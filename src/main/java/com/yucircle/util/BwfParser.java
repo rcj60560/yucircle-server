@@ -87,7 +87,7 @@ public final class BwfParser {
             BwfRankingEntry e = new BwfRankingEntry();
             e.setDiscipline(discipline);
             e.setPublicationDate(pubDate);
-            e.setRank(row.path("rank").asInt());
+            e.setRankNum(row.path("rank").asInt());
             e.setRankChange(row.path("rank_change").asInt());
             e.setCountry(COUNTRY_CODES.getOrDefault(countryName, countryName));
             e.setPlayerName(player);

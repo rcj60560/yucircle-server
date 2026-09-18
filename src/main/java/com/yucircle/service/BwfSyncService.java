@@ -86,7 +86,7 @@ public class BwfSyncService {
                     (ps, e) -> {
                         ps.setString(1, e.getDiscipline());
                         ps.setDate(2, Date.valueOf(e.getPublicationDate()));
-                        ps.setInt(3, e.getRank());
+                        ps.setInt(3, e.getRankNum());
                         ps.setInt(4, e.getRankChange());
                         ps.setString(5, e.getCountry());
                         ps.setString(6, e.getPlayerName());

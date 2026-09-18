@@ -75,7 +75,7 @@ public class BwfController {
             List<Map<String, Object>> entries = syncService.latestRankings(disc).stream()
                     .map(e -> {
                         Map<String, Object> m = new LinkedHashMap<>();
-                        m.put("rank", e.getRank());
+                        m.put("rank", e.getRankNum()); // /app 契约对外仍叫 rank
                         m.put("change", e.getRankChange());
                         m.put("country", e.getCountry());
                         m.put("player", e.getPlayerName());
