@@ -23,6 +23,13 @@
 | 2026-08-19 | （见下） | 5 张 bwf_* 表 DDL（唯一键 upsert 依据）+ 5 entity + 5 mapper，compileJava 通过 |
 | 2026-08-19 | — | 设计定稿（用户确认：v0 只今年、逐分仅 Grade 1 大赛、server 自抓、先本地后阿里云）；文档体系建立，旧交付文档清理（FINAL_REPORT / DELIVERY_* / PHASE4_COMPLETION_SUMMARY / API_TESTING / QUICKSTART / HELP 删除，README 与 doc/05 保留） |
 
+## 2026-09-18 排名 500 事故记录（已修复）
+
+- 症状：/bwf/rankings 与 /bwf/app/rankings 全部 500；/app/schedule 空。
+- 根因（实锤）：`rank` 是 MySQL8 保留字，MyBatis-Plus 生成的读取 SQL 不加反引号 → 语法错误 1064；写入 SQL 当时手写加了反引号所以 250 条数据完好（假象：写入成功=表正常）。叠加：本地库被重建后一直空表（周一 10:00 定时窗口未命中/未触发）+ 前端配置的局域网 IP 失效 → App 全链路降级到一个月前的缓存/资产。
+- 修复：列改名 `rank_num`（ALTER 已在用户本地库执行，唯一键自动跟随）；实体 `@TableField("rank_num")` 保持属性名 rank（JSON 输出不变）；syncRankings 写入 SQL 与 orderByAsc 同步改名；init.sql 更新。gradle build（含测试）通过。
+- 运维提示：库被重建后可用 POST /api/bwf/admin/refresh?scope=all 一键补齐（本次 schedule 32 站 + rankings 250 条已补）。
+
 ## 下次接续
 
 - 全部完成（2026-08-19）。联调入口：启动 server 后浏览器调 POST /api/bwf/admin/refresh?scope=all 落库，再 GET /api/bwf/app/rankings 验证；App debug 模式自动读 server。上生产：收紧 CORS 域名 + /bwf/admin/* 加 token。数据源坑位见架构文档 §3（publicationId 数字尾 / tmt_id 数字 / 官方顺序 / 累计分）。

@@ -221,7 +221,7 @@ CREATE TABLE IF NOT EXISTS `bwf_ranking_entry` (
     `id`               BIGINT       NOT NULL AUTO_INCREMENT,
     `discipline`       VARCHAR(4)   NOT NULL COMMENT 'ms/ws/md/wd/xd',
     `publication_date` DATE         NOT NULL COMMENT '发布日期（周key的date）',
-    `rank`             INT          NOT NULL COMMENT '排名',
+    `rank_num`         INT          NOT NULL COMMENT '排名（rank 为 MySQL8 保留字）',
     `rank_change`      INT          DEFAULT 0 COMMENT '升降',
     `country`          VARCHAR(50)           COMMENT '国家码',
     `player_name`      VARCHAR(200) NOT NULL COMMENT '球员名（双打拼接 A / B）',
@@ -229,7 +229,7 @@ CREATE TABLE IF NOT EXISTS `bwf_ranking_entry` (
     `created_at`       DATETIME              COMMENT '创建时间',
     `updated_at`       DATETIME              COMMENT '更新时间',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_pub` (`discipline`, `publication_date`, `rank`)
+    UNIQUE KEY `uk_pub` (`discipline`, `publication_date`, `rank_num`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='BWF排名快照';
 
 CREATE TABLE IF NOT EXISTS `bwf_match` (

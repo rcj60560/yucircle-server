@@ -78,7 +78,7 @@ public class BwfSyncService {
             List<BwfRankingEntry> entries = BwfParser.rankings(table, d.getKey(), pubDate);
             jdbc.batchUpdate(
                     "INSERT INTO bwf_ranking_entry"
-                            + "(discipline, publication_date, `rank`, rank_change, country, player_name, points, created_at, updated_at) "
+                            + "(discipline, publication_date, `rank_num`, rank_change, country, player_name, points, created_at, updated_at) "
                             + "VALUES (?,?,?,?,?,?,?,?,NOW()) "
                             + "ON DUPLICATE KEY UPDATE rank_change=VALUES(rank_change), country=VALUES(country), "
                             + "player_name=VALUES(player_name), points=VALUES(points), updated_at=NOW()",
@@ -240,7 +240,7 @@ public class BwfSyncService {
         return rankingMapper.selectList(new QueryWrapper<BwfRankingEntry>()
                 .eq("discipline", disc)
                 .eq("publication_date", latest.getPublicationDate())
-                .orderByAsc("rank"));
+                .orderByAsc("rank_num"));
     }
 
     /** 单球员走势（本年，按期升序） */
